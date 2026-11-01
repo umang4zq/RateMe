@@ -1,0 +1,9 @@
+C:\Users\HP\source\repos\RateMe\RateMe\bin\Debug\RateMe.exe.config
+C:\Users\HP\source\repos\RateMe\RateMe\bin\Debug\RateMe.exe
+C:\Users\HP\source\repos\RateMe\RateMe\bin\Debug\RateMe.pdb
+C:\Users\HP\source\repos\RateMe\RateMe\obj\Debug\RateMe.csproj.AssemblyReference.cache
+C:\Users\HP\source\repos\RateMe\RateMe\obj\Debug\RateMe.Properties.Resources.resources
+C:\Users\HP\source\repos\RateMe\RateMe\obj\Debug\RateMe.csproj.GenerateResource.cache
+C:\Users\HP\source\repos\RateMe\RateMe\obj\Debug\RateMe.csproj.CoreCompileInputs.cache
+C:\Users\HP\source\repos\RateMe\RateMe\obj\Debug\RateMe.exe
+C:\Users\HP\source\repos\RateMe\RateMe\obj\Debug\RateMe.pdb
