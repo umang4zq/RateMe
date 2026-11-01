@@ -162,3 +162,4 @@ RateMe/
 
 ## 📄 License
 This project is for educational and portfolio demonstration purposes. All movie metadata and poster artwork are provided via the OMDb API. Design inspiration belongs to Starbucks Corporation.
+
