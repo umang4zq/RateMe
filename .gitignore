@@ -1,0 +1,49 @@
+# ==============================================================================
+# .gitignore for Visual Studio 2019 / .NET Framework WinForms
+# ==============================================================================
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# User-specific files (MonoDevelop/Xamarin Studio)
+*.userprefs
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# Visual Studio 2015/2017/2019/2022 cache/options directory
+.vs/
+
+# Backup and temp files
+*.old
+*.bak
+*~
+*.tmp
+
+# SQL Server database and log files (LocalDB / Express)
+*.mdf
+*.ldf
+
+# Local application data cache / storage created at runtime
+RateMe/bin/
+RateMe/obj/
+**/bin/
+**/obj/
+rateme_data.json
