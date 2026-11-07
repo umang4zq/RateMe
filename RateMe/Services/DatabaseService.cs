@@ -153,6 +153,12 @@ namespace RateMe.Services
                     {
                         cmd.ExecuteNonQuery();
                     }
+
+                    // Ensure all 25 curated items exist in SQL Server
+                    foreach (var item in SeedData.GetCuratedMedia())
+                    {
+                        GetOrCreateMediaItem(item);
+                    }
                 }
             }
             catch (Exception ex)
@@ -191,7 +197,7 @@ namespace RateMe.Services
                 }
             }
 
-            if (_localUsers.Count == 0 || _localMedia.Count == 0)
+            if (_localUsers.Count == 0 || _localMedia.Count < 25)
             {
                 SeedLocalDefaults();
             }

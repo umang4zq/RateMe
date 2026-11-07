@@ -10,6 +10,17 @@ using RateMe.UI.Controls;
 
 namespace RateMe.Views
 {
+    public class DoubleBufferedTableLayoutPanel : TableLayoutPanel
+    {
+        public DoubleBufferedTableLayoutPanel()
+        {
+            DoubleBuffered = true;
+            SetStyle(ControlStyles.AllPaintingInWmPaint |
+                     ControlStyles.OptimizedDoubleBuffer |
+                     ControlStyles.UserPaint, true);
+        }
+    }
+
     public class ExploreView : UserControl
     {
         private readonly DatabaseService _db;
@@ -19,8 +30,9 @@ namespace RateMe.Views
         private readonly Action<MediaItem> _openMediaDetail;
 
         private KineticScrollPanel _scrollContainer;
-        private FlowLayoutPanel _cardsFlowPanel;
+        private Panel _pnlHero;
         private FlowLayoutPanel _flowFilterBar;
+        private DoubleBufferedTableLayoutPanel _gridPanel;
         private PillButton _btnFilterAll;
         private PillButton _btnFilterMovies;
         private PillButton _btnFilterSeries;
@@ -51,12 +63,11 @@ namespace RateMe.Views
             };
 
             // 1. Hero Feature Band (from rate-me-design.md)
-            var pnlHero = new Panel
+            _pnlHero = new Panel
             {
                 Location = new Point(0, 0),
                 Size = new Size(1100, 215),
-                BackColor = Theme.HouseGreen,
-                Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
+                BackColor = Theme.HouseGreen
             };
 
             var lblHeroSuper = new Label
@@ -104,16 +115,16 @@ namespace RateMe.Views
             };
             btnHeroStaff.Click += (s, e) => SetFilter("All");
 
-            pnlHero.Controls.Add(lblHeroSuper);
-            pnlHero.Controls.Add(lblHeroHeadline);
-            pnlHero.Controls.Add(lblHeroDesc);
-            pnlHero.Controls.Add(btnHeroAction);
-            pnlHero.Controls.Add(btnHeroStaff);
+            _pnlHero.Controls.Add(lblHeroSuper);
+            _pnlHero.Controls.Add(lblHeroHeadline);
+            _pnlHero.Controls.Add(lblHeroDesc);
+            _pnlHero.Controls.Add(btnHeroAction);
+            _pnlHero.Controls.Add(btnHeroStaff);
 
-            // 2. Filter Bar using FlowLayoutPanel for zero overlapping
+            // 2. Filter Bar using FlowLayoutPanel
             _flowFilterBar = new FlowLayoutPanel
             {
-                Location = new Point(32, 230),
+                Location = new Point(24, 230),
                 Size = new Size(1000, 46),
                 BackColor = Color.Transparent,
                 WrapContents = false
@@ -160,22 +171,51 @@ namespace RateMe.Views
             _flowFilterBar.Controls.Add(_btnFilterSeries);
             _flowFilterBar.Controls.Add(_btnFilterTopRated);
 
-            // 3. Media Cards Flow Layout
-            _cardsFlowPanel = new FlowLayoutPanel
+            // 3. Strict 5-Column Grid Layout (5 by 5 Grid)
+            _gridPanel = new DoubleBufferedTableLayoutPanel
             {
-                Location = new Point(28, 285),
-                Size = new Size(1050, 800),
+                Location = new Point(24, 285),
+                Size = new Size(1050, 1800),
                 AutoSize = true,
                 AutoSizeMode = AutoSizeMode.GrowAndShrink,
                 BackColor = Color.Transparent,
-                WrapContents = true
+                ColumnCount = 5
             };
 
-            _scrollContainer.Controls.Add(pnlHero);
+            for (int i = 0; i < 5; i++)
+            {
+                _gridPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20f));
+            }
+
+            _scrollContainer.Controls.Add(_pnlHero);
             _scrollContainer.Controls.Add(_flowFilterBar);
-            _scrollContainer.Controls.Add(_cardsFlowPanel);
+            _scrollContainer.Controls.Add(_gridPanel);
 
             Controls.Add(_scrollContainer);
+
+            _scrollContainer.Resize += (s, e) => UpdateLayoutWidths();
+            Resize += (s, e) => UpdateLayoutWidths();
+            HandleCreated += (s, e) => UpdateLayoutWidths();
+        }
+
+        private void UpdateLayoutWidths()
+        {
+            if (_scrollContainer == null) return;
+            int clientWidth = _scrollContainer.ClientSize.Width;
+            int availableWidth = Math.Max(800, clientWidth - 48);
+
+            if (_gridPanel != null && _gridPanel.Width != availableWidth)
+            {
+                _gridPanel.Width = availableWidth;
+            }
+            if (_pnlHero != null && _pnlHero.Width != clientWidth)
+            {
+                _pnlHero.Width = Math.Max(800, clientWidth);
+            }
+            if (_flowFilterBar != null && _flowFilterBar.Width != availableWidth)
+            {
+                _flowFilterBar.Width = availableWidth;
+            }
         }
 
         private void SetFilter(string filter)
@@ -192,7 +232,12 @@ namespace RateMe.Views
 
         public void LoadMediaCards()
         {
-            _cardsFlowPanel.Controls.Clear();
+            if (_gridPanel == null) return;
+
+            _gridPanel.SuspendLayout();
+            _gridPanel.Controls.Clear();
+            _gridPanel.RowStyles.Clear();
+
             var allItems = _db.GetCuratedMedia();
 
             IEnumerable<MediaItem> filtered = allItems;
@@ -209,19 +254,36 @@ namespace RateMe.Views
                 filtered = allItems.OrderByDescending(m => m.AverageUserRating > 0 ? m.AverageUserRating : (m.ImdbRating ?? 0));
             }
 
-            foreach (var media in filtered)
+            var list = filtered.ToList();
+            int totalCount = list.Count;
+            int numRows = (totalCount + 4) / 5;
+            if (numRows < 1) numRows = 1;
+
+            _gridPanel.RowCount = numRows;
+            for (int r = 0; r < numRows; r++)
             {
-                var card = CreateMediaCard(media);
-                _cardsFlowPanel.Controls.Add(card);
+                _gridPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 355f));
             }
+
+            for (int i = 0; i < totalCount; i++)
+            {
+                int col = i % 5;
+                int row = i / 5;
+                var card = CreateMediaCard(list[i]);
+                _gridPanel.Controls.Add(card, col, row);
+            }
+
+            _gridPanel.ResumeLayout(true);
+            UpdateLayoutWidths();
         }
 
         private Control CreateMediaCard(MediaItem media)
         {
             var card = new RoundedCard
             {
-                Size = new Size(205, 325),
-                Margin = new Padding(10, 10, 10, 16),
+                Size = new Size(200, 340),
+                Dock = DockStyle.Fill,
+                Margin = new Padding(6, 6, 6, 12),
                 BorderRadius = 12,
                 HoverElevate = true,
                 DrawShadow = true,
@@ -231,20 +293,23 @@ namespace RateMe.Views
             var pic = new PictureBox
             {
                 Location = new Point(10, 10),
-                Size = new Size(185, 205),
+                Size = new Size(180, 220),
+                Height = 220,
+                Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
                 SizeMode = PictureBoxSizeMode.Zoom,
                 BackColor = Color.FromArgb(20, 38, 33),
                 Cursor = Cursors.Hand
             };
-            pic.Image = ImageCache.GetPlaceholder(media.Title, 185, 205);
+            pic.Image = ImageCache.GetPlaceholder(media.Title, 180, 220);
             LoadPosterAsync(pic, media.PosterUrl, media.Title);
 
             var badge = new RatingBadge
             {
                 RatingText = $"{media.DisplayScore} ★",
                 IsGold = true,
-                Location = new Point(12, 224),
+                Location = new Point(10, 238),
                 Size = new Size(62, 24),
+                Anchor = AnchorStyles.Top | AnchorStyles.Left,
                 Cursor = Cursors.Hand
             };
 
@@ -253,8 +318,9 @@ namespace RateMe.Views
                 Text = media.Year ?? "",
                 Font = Theme.Small,
                 ForeColor = Theme.TextSecondary,
-                Location = new Point(80, 227),
-                Size = new Size(112, 18),
+                Location = new Point(110, 241),
+                Size = new Size(80, 18),
+                Anchor = AnchorStyles.Top | AnchorStyles.Right,
                 TextAlign = ContentAlignment.TopRight,
                 Cursor = Cursors.Hand
             };
@@ -264,8 +330,9 @@ namespace RateMe.Views
                 Text = media.Title,
                 Font = Theme.BodyBold,
                 ForeColor = Theme.TextPrimary,
-                Location = new Point(12, 252),
-                Size = new Size(180, 36),
+                Location = new Point(10, 268),
+                Size = new Size(180, 38),
+                Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
                 AutoEllipsis = true,
                 Cursor = Cursors.Hand
             };
@@ -275,8 +342,9 @@ namespace RateMe.Views
                 Text = media.Genre ?? (media.Type == "series" ? "Series" : "Feature"),
                 Font = Theme.Small,
                 ForeColor = Theme.StarbucksGreen,
-                Location = new Point(12, 292),
+                Location = new Point(10, 310),
                 Size = new Size(180, 18),
+                Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
                 AutoEllipsis = true,
                 Cursor = Cursors.Hand
             };
@@ -301,7 +369,7 @@ namespace RateMe.Views
         {
             if (!string.IsNullOrEmpty(url))
             {
-                var img = await ImageCache.GetImageAsync(url, title, 185, 205);
+                var img = await ImageCache.GetImageAsync(url, title, 180, 220);
                 if (img != null && !pb.IsDisposed)
                 {
                     pb.Image = img;
