@@ -9,6 +9,8 @@
 
 **RateMe** is a full-featured desktop application built with **C# Windows Forms** (.NET Framework 4.7.2) and **Microsoft Visual Studio 2019**. The application is styled according to the **Starbucks Flagship Retail Design System**, featuring a warm café aesthetic, kinetic spring scroll physics, dual SQL Server / LocalDB storage with JSON fallback, live OMDb API integration, and an administrative governance portal.
 
+> 📖 **AI Agent & Developer Runbook:** For complete project architecture, one-command terminal build scripts, and testing instructions, consult [`PROJECT_MANUAL.md`](PROJECT_MANUAL.md).
+
 ---
 
 ## 🎨 Visual Identity & Design System
