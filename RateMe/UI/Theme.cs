@@ -79,6 +79,7 @@ namespace RateMe.UI
         public static Font BodyBold => new Font(PrimaryFontFamily, 9.5f, FontStyle.Bold);
         public static Font Small => new Font(PrimaryFontFamily, 8.5f, FontStyle.Regular);
         public static Font SmallBold => new Font(PrimaryFontFamily, 8.5f, FontStyle.Bold);
+        public static Font Micro => new Font(PrimaryFontFamily, 8.0f, FontStyle.Bold);
         public static Font ButtonFont => new Font(PrimaryFontFamily, 9.5f, FontStyle.Bold);
 
         // -------------------------------------------------------------

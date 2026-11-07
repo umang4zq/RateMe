@@ -2,12 +2,17 @@ using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 namespace RateMe.UI.Controls
 {
     public class ModernTextBox : Control
     {
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        private static extern int SendMessage(IntPtr hWnd, int msg, int wParam, [MarshalAs(UnmanagedType.LPWStr)] string lParam);
+        private const int EM_SETCUEBANNER = 0x1501;
+
         private readonly TextBox _innerTextBox = new TextBox();
         private string _placeholderText = "";
         private bool _isFocused = false;
@@ -18,7 +23,12 @@ namespace RateMe.UI.Controls
         public string PlaceholderText
         {
             get => _placeholderText;
-            set { _placeholderText = value; Invalidate(); }
+            set
+            {
+                _placeholderText = value ?? "";
+                UpdateCueBanner();
+                Invalidate();
+            }
         }
 
         [Category("Appearance")]
@@ -68,10 +78,8 @@ namespace RateMe.UI.Controls
             SetStyle(ControlStyles.UserPaint |
                      ControlStyles.AllPaintingInWmPaint |
                      ControlStyles.OptimizedDoubleBuffer |
-                     ControlStyles.SupportsTransparentBackColor |
                      ControlStyles.ResizeRedraw, true);
 
-            BackColor = Color.Transparent;
             Font = Theme.Body;
             Size = new Size(240, 38);
 
@@ -79,6 +87,7 @@ namespace RateMe.UI.Controls
             _innerTextBox.Font = Font;
             _innerTextBox.BackColor = Theme.CardBackground;
             _innerTextBox.ForeColor = Theme.TextPrimary;
+
             _innerTextBox.GotFocus += (s, e) => { _isFocused = true; Invalidate(); };
             _innerTextBox.LostFocus += (s, e) => { _isFocused = false; Invalidate(); };
             _innerTextBox.TextChanged += (s, e) =>
@@ -87,16 +96,32 @@ namespace RateMe.UI.Controls
                 TextChangedCustom?.Invoke(this, EventArgs.Empty);
             };
 
+            _innerTextBox.HandleCreated += (s, e) => UpdateCueBanner();
+
             Controls.Add(_innerTextBox);
             AdjustInnerTextBox();
         }
 
+        protected override void OnHandleCreated(EventArgs e)
+        {
+            base.OnHandleCreated(e);
+            UpdateCueBanner();
+        }
+
+        private void UpdateCueBanner()
+        {
+            if (_innerTextBox.IsHandleCreated && !string.IsNullOrEmpty(_placeholderText))
+            {
+                SendMessage(_innerTextBox.Handle, EM_SETCUEBANNER, 1, _placeholderText);
+            }
+        }
+
         private void AdjustInnerTextBox()
         {
-            int padX = 14;
+            int padX = 12;
             int padY = _innerTextBox.Multiline ? 10 : (Height - _innerTextBox.PreferredHeight) / 2;
             _innerTextBox.Location = new Point(padX, padY);
-            _innerTextBox.Size = new Size(Width - (padX * 2), _innerTextBox.Multiline ? Height - 20 : _innerTextBox.PreferredHeight);
+            _innerTextBox.Size = new Size(Math.Max(10, Width - (padX * 2)), _innerTextBox.Multiline ? Height - 20 : _innerTextBox.PreferredHeight);
         }
 
         protected override void OnResize(EventArgs e)
@@ -125,12 +150,26 @@ namespace RateMe.UI.Controls
             g.SmoothingMode = SmoothingMode.AntiAlias;
             g.PixelOffsetMode = PixelOffsetMode.HighQuality;
 
+            Color parentBg = Theme.PageCanvas;
+            Control cur = Parent;
+            while (cur != null)
+            {
+                if (cur.BackColor != Color.Transparent && cur.BackColor != Color.Empty && cur.BackColor.A > 0)
+                {
+                    parentBg = cur.BackColor;
+                    break;
+                }
+                cur = cur.Parent;
+            }
+
+            g.Clear(parentBg);
+
             Rectangle rect = ClientRectangle;
             rect.Width -= 1;
             rect.Height -= 1;
 
             Color bg = Theme.CardBackground;
-            Color border = _isFocused ? Theme.GreenAccent : Theme.CardBorder;
+            Color border = _isFocused ? Theme.GreenAccent : Color.FromArgb(200, 205, 208);
 
             using (GraphicsPath path = Theme.CreateRoundedRectanglePath(rect, _borderRadius))
             {
@@ -138,19 +177,11 @@ namespace RateMe.UI.Controls
                 {
                     g.FillPath(bgBrush, path);
                 }
-                using (Pen borderPen = new Pen(border, _isFocused ? 1.6f : 1f))
+                using (Pen borderPen = new Pen(border, _isFocused ? 1.8f : 1.2f))
                 {
                     g.DrawPath(borderPen, path);
                 }
             }
-
-            // Draw placeholder text if empty and not focused
-            if (string.IsNullOrEmpty(_innerTextBox.Text) && !string.IsNullOrEmpty(_placeholderText) && !_isFocused)
-            {
-                Rectangle phRect = new Rectangle(14, (Height - Font.Height) / 2, Width - 28, Font.Height);
-                TextRenderer.DrawText(g, _placeholderText, Font, phRect, Theme.TextSecondary, TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
-            }
         }
     }
 }
-

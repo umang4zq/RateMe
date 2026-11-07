@@ -89,7 +89,7 @@ namespace RateMe
             {
                 Location = new Point(160, 16),
                 Size = new Size(640, 42),
-                BackColor = Color.Transparent,
+                BackColor = Theme.HouseGreen,
                 WrapContents = false
             };
 
@@ -114,7 +114,7 @@ namespace RateMe
                 Anchor = AnchorStyles.Top | AnchorStyles.Right,
                 Size = new Size(340, 42),
                 Location = new Point(ClientSize.Width - 360, 16),
-                BackColor = Color.Transparent,
+                BackColor = Theme.HouseGreen,
                 FlowDirection = FlowDirection.RightToLeft,
                 WrapContents = false
             };

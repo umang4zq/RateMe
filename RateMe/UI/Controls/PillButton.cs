@@ -91,13 +91,20 @@ namespace RateMe.UI.Controls
             g.PixelOffsetMode = PixelOffsetMode.HighQuality;
             g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
 
-            // 1. ALWAYS clear full bounds with Parent background color first!
-            // This guarantees NO white box corner artifacts or double-buffer smearing!
-            Color parentBg = Parent != null ? Parent.BackColor : Theme.PageCanvas;
-            using (SolidBrush parentBrush = new SolidBrush(parentBg))
+            // Find real non-transparent parent background by walking up the hierarchy
+            Color parentBg = Theme.PageCanvas;
+            Control cur = Parent;
+            while (cur != null)
             {
-                g.FillRectangle(parentBrush, ClientRectangle);
+                if (cur.BackColor != Color.Transparent && cur.BackColor != Color.Empty && cur.BackColor.A > 0)
+                {
+                    parentBg = cur.BackColor;
+                    break;
+                }
+                cur = cur.Parent;
             }
+
+            g.Clear(parentBg);
 
             Rectangle rect = ClientRectangle;
             rect.Width -= 1;
@@ -145,12 +152,14 @@ namespace RateMe.UI.Controls
 
                 case PillButtonStyle.WhiteFilled:
                     pillBgColor = _isPressed ? Theme.Ceramic : (_isHovered ? Theme.NeutralWarm : Color.White);
-                    textColor = Theme.GreenAccent;
+                    borderColor = Color.White;
+                    hasBorder = true;
+                    textColor = Theme.StarbucksGreen;
                     break;
 
                 case PillButtonStyle.WhiteOutlined:
-                    pillBgColor = _isHovered ? Color.FromArgb(40, Color.White) : parentBg;
-                    borderColor = Color.White;
+                    pillBgColor = _isHovered ? Color.FromArgb(45, Color.White) : parentBg;
+                    borderColor = _isHovered ? Color.White : Color.FromArgb(140, Color.White);
                     textColor = Color.White;
                     hasBorder = true;
                     break;

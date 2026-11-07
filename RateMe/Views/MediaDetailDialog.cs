@@ -78,6 +78,7 @@ namespace RateMe.Views
                 Text = $"Explore  /  {(_media.Type == "series" ? "TV Series" : "Movies")}  /  {_media.Title}",
                 Font = Theme.Small,
                 ForeColor = Theme.TextWhiteSoft,
+                BackColor = Color.Transparent,
                 Location = new Point(24, 16),
                 AutoSize = true
             };
@@ -96,6 +97,7 @@ namespace RateMe.Views
                 Text = _media.Title,
                 Font = new Font(Theme.SerifFontFamily, 20f, FontStyle.Bold),
                 ForeColor = Color.White,
+                BackColor = Color.Transparent,
                 Location = new Point(175, 44),
                 Size = new Size(570, 36),
                 AutoEllipsis = true
@@ -106,6 +108,7 @@ namespace RateMe.Views
                 Text = $"{_media.Year}  •  {_media.Runtime ?? "120 min"}  •  {_media.Genre ?? "Feature Film"}",
                 Font = Theme.Body,
                 ForeColor = Theme.TextWhiteSoft,
+                BackColor = Color.Transparent,
                 Location = new Point(175, 84),
                 Size = new Size(570, 24)
             };
@@ -168,6 +171,7 @@ namespace RateMe.Views
                 Text = "SYNOPSIS & CREDITS",
                 Font = Theme.SmallBold,
                 ForeColor = Theme.StarbucksGreen,
+                BackColor = Color.Transparent,
                 Location = new Point(16, 12),
                 AutoSize = true
             };
@@ -177,6 +181,7 @@ namespace RateMe.Views
                 Text = _media.Plot ?? "Loading full synopsis...",
                 Font = Theme.Body,
                 ForeColor = Theme.TextPrimary,
+                BackColor = Color.Transparent,
                 Location = new Point(16, 36),
                 Size = new Size(700, 75),
                 AutoEllipsis = true
@@ -199,6 +204,7 @@ namespace RateMe.Views
                 Text = "RATE THIS TITLE",
                 Font = Theme.SmallBold,
                 ForeColor = Theme.StarbucksGreen,
+                BackColor = Color.Transparent,
                 Location = new Point(16, 14),
                 AutoSize = true
             };
@@ -208,6 +214,7 @@ namespace RateMe.Views
                 Text = "Click a star to rate (1 - 10)",
                 Font = Theme.BodyBold,
                 ForeColor = Theme.Gold,
+                BackColor = Color.Transparent,
                 Location = new Point(360, 14),
                 Size = new Size(350, 22),
                 TextAlign = ContentAlignment.TopRight

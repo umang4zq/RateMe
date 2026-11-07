@@ -64,6 +64,7 @@ namespace RateMe.Views
                 Text = _isNew ? "Create User Account" : "Edit User Account",
                 Font = Theme.HeaderH1,
                 ForeColor = Theme.StarbucksGreen,
+                BackColor = Color.Transparent,
                 Location = new Point(20, 16),
                 AutoSize = true
             };
@@ -75,6 +76,7 @@ namespace RateMe.Views
                     : $"Editing account details for @{_existingUser?.Username}",
                 Font = Theme.Small,
                 ForeColor = Theme.TextSecondary,
+                BackColor = Color.Transparent,
                 Location = new Point(20, 44),
                 AutoSize = true
             };
@@ -84,6 +86,7 @@ namespace RateMe.Views
                 Text = "",
                 Font = Theme.SmallBold,
                 ForeColor = Theme.DestructiveRed,
+                BackColor = Color.Transparent,
                 Location = new Point(20, 68),
                 Size = new Size(380, 24),
                 Visible = false
@@ -91,7 +94,7 @@ namespace RateMe.Views
 
             int y = 96;
 
-            var lblUser = new Label { Text = "Username:", Font = Theme.SmallBold, ForeColor = Theme.TextPrimary, Location = new Point(20, y), AutoSize = true };
+            var lblUser = new Label { Text = "Username:", Font = Theme.SmallBold, ForeColor = Theme.TextPrimary, BackColor = Color.Transparent, Location = new Point(20, y), AutoSize = true };
             _txtUsername = new ModernTextBox { PlaceholderText = "username", Location = new Point(20, y + 20), Size = new Size(380, 36) };
             if (!_isNew)
             {
@@ -100,29 +103,29 @@ namespace RateMe.Views
             }
             y += 62;
 
-            var lblEmail = new Label { Text = "Email Address:", Font = Theme.SmallBold, ForeColor = Theme.TextPrimary, Location = new Point(20, y), AutoSize = true };
+            var lblEmail = new Label { Text = "Email Address:", Font = Theme.SmallBold, ForeColor = Theme.TextPrimary, BackColor = Color.Transparent, Location = new Point(20, y), AutoSize = true };
             _txtEmail = new ModernTextBox { PlaceholderText = "user@domain.com", Location = new Point(20, y + 20), Size = new Size(380, 36) };
             y += 62;
 
-            var lblDisplayName = new Label { Text = "Display Name:", Font = Theme.SmallBold, ForeColor = Theme.TextPrimary, Location = new Point(20, y), AutoSize = true };
+            var lblDisplayName = new Label { Text = "Display Name:", Font = Theme.SmallBold, ForeColor = Theme.TextPrimary, BackColor = Color.Transparent, Location = new Point(20, y), AutoSize = true };
             _txtDisplayName = new ModernTextBox { PlaceholderText = "Display Name", Location = new Point(20, y + 20), Size = new Size(380, 36) };
             y += 62;
 
             if (_isNew)
             {
-                var lblPwd = new Label { Text = "Initial Password:", Font = Theme.SmallBold, ForeColor = Theme.TextPrimary, Location = new Point(20, y), AutoSize = true };
+                var lblPwd = new Label { Text = "Initial Password:", Font = Theme.SmallBold, ForeColor = Theme.TextPrimary, BackColor = Color.Transparent, Location = new Point(20, y), AutoSize = true };
                 _txtPassword = new ModernTextBox { PlaceholderText = "Password (min 6 chars)", UseSystemPasswordChar = true, Location = new Point(20, y + 20), Size = new Size(380, 36) };
                 card.Controls.Add(lblPwd);
                 card.Controls.Add(_txtPassword);
                 y += 62;
             }
 
-            var lblBio = new Label { Text = "Bio:", Font = Theme.SmallBold, ForeColor = Theme.TextPrimary, Location = new Point(20, y), AutoSize = true };
+            var lblBio = new Label { Text = "Bio:", Font = Theme.SmallBold, ForeColor = Theme.TextPrimary, BackColor = Color.Transparent, Location = new Point(20, y), AutoSize = true };
             _txtBio = new ModernTextBox { PlaceholderText = "Short bio or notes...", Location = new Point(20, y + 20), Size = new Size(380, 36) };
             y += 62;
 
             // Role selection
-            var lblRole = new Label { Text = "System Role:", Font = Theme.SmallBold, ForeColor = Theme.TextPrimary, Location = new Point(20, y), AutoSize = true };
+            var lblRole = new Label { Text = "System Role:", Font = Theme.SmallBold, ForeColor = Theme.TextPrimary, BackColor = Color.Transparent, Location = new Point(20, y), AutoSize = true };
             _cboRole = new ComboBox
             {
                 DropDownStyle = ComboBoxStyle.DropDownList,
