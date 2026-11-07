@@ -26,11 +26,14 @@ namespace RateMe
         private PillButton _btnNavWatchlist;
         private PillButton _btnNavProfile;
         private PillButton _btnNavSettings;
-        private PillButton _btnNavAdmin;
 
+        // Right Action Controls (Separate Admin, Theme, Sign In, Sign Up, Profile, Exit)
         private FlowLayoutPanel _flowRightActions;
+        private PillButton _btnAdmin;
         private PillButton _btnThemeToggle;
-        private PillButton _btnAuth;
+        private PillButton _btnSignIn;
+        private PillButton _btnSignUp;
+        private PillButton _btnUserProfile;
         private PillButton _btnSignOut;
 
         private Panel _pnlContentHost;
@@ -78,17 +81,18 @@ namespace RateMe
                 Text = "RateMe ★",
                 Font = new Font(Theme.SerifFontFamily, 16f, FontStyle.Bold),
                 ForeColor = Theme.Gold,
+                BackColor = Theme.HouseGreen,
                 Location = new Point(24, 18),
                 AutoSize = true,
                 Cursor = Cursors.Hand
             };
             _lblLogo.Click += (s, e) => SwitchView("Explore");
 
-            // Navigation Tabs Flow Layout
+            // Navigation Tabs Flow Layout (Public Browsing Tabs only)
             _flowNavTabs = new FlowLayoutPanel
             {
-                Location = new Point(160, 16),
-                Size = new Size(640, 42),
+                Location = new Point(155, 16),
+                Size = new Size(520, 42),
                 BackColor = Theme.HouseGreen,
                 WrapContents = false
             };
@@ -98,32 +102,30 @@ namespace RateMe
             _btnNavWatchlist = CreateNavPill("Watchlist", () => SwitchView("Watchlist"));
             _btnNavProfile = CreateNavPill("Profile", () => SwitchView("Profile"));
             _btnNavSettings = CreateNavPill("Settings", () => SwitchView("Settings"));
-            _btnNavAdmin = CreateNavPill("Admin ⚙", OnNavAdminClick);
-            _btnNavAdmin.Size = new Size(100, 36);
 
             _flowNavTabs.Controls.Add(_btnNavExplore);
             _flowNavTabs.Controls.Add(_btnNavSearch);
             _flowNavTabs.Controls.Add(_btnNavWatchlist);
             _flowNavTabs.Controls.Add(_btnNavProfile);
             _flowNavTabs.Controls.Add(_btnNavSettings);
-            _flowNavTabs.Controls.Add(_btnNavAdmin);
 
-            // Right Action Controls
+            // Right Action Controls (Separate Admin + Theme + Sign In + Sign Up / Profile)
             _flowRightActions = new FlowLayoutPanel
             {
                 Anchor = AnchorStyles.Top | AnchorStyles.Right,
-                Size = new Size(340, 42),
-                Location = new Point(ClientSize.Width - 360, 16),
+                Size = new Size(520, 42),
+                Location = new Point(ClientSize.Width - 530, 16),
                 BackColor = Theme.HouseGreen,
                 FlowDirection = FlowDirection.RightToLeft,
                 WrapContents = false
             };
 
+            // 1. Exit / Sign Out Button (Visible when logged in)
             _btnSignOut = new PillButton
             {
                 Text = "Exit",
                 Style = PillButtonStyle.WhiteOutlined,
-                Size = new Size(68, 36),
+                Size = new Size(65, 36),
                 Margin = new Padding(6, 0, 0, 0),
                 Visible = false
             };
@@ -133,15 +135,38 @@ namespace RateMe
                 ShowToast("Signed out successfully.");
             };
 
-            _btnAuth = new PillButton
+            // 2. User Profile Pill (Visible when logged in)
+            _btnUserProfile = new PillButton
             {
-                Text = "Sign In",
+                Text = "👤 Account",
                 Style = PillButtonStyle.WhiteFilled,
                 Size = new Size(130, 36),
+                Margin = new Padding(6, 0, 0, 0),
+                Visible = false
+            };
+            _btnUserProfile.Click += (s, e) => SwitchView("Profile");
+
+            // 3. Dedicated "Sign Up" Button (Visible when logged out)
+            _btnSignUp = new PillButton
+            {
+                Text = "Join now",
+                Style = PillButtonStyle.WhiteFilled,
+                Size = new Size(95, 36),
                 Margin = new Padding(6, 0, 0, 0)
             };
-            _btnAuth.Click += OnAuthButtonClick;
+            _btnSignUp.Click += (s, e) => OpenSignUpDialog();
 
+            // 4. Dedicated "Sign In" Button (Visible when logged out)
+            _btnSignIn = new PillButton
+            {
+                Text = "Sign In",
+                Style = PillButtonStyle.WhiteOutlined,
+                Size = new Size(85, 36),
+                Margin = new Padding(6, 0, 0, 0)
+            };
+            _btnSignIn.Click += (s, e) => OpenSignInDialog();
+
+            // 5. Theme Toggle Button
             _btnThemeToggle = new PillButton
             {
                 Text = Theme.IsDarkMode ? "🌙 Dark" : "☀ Light",
@@ -157,9 +182,24 @@ namespace RateMe
                 ShowToast(Theme.IsDarkMode ? "Dark Mode Activated 🌙" : "Warm Light Canvas Activated ☀");
             };
 
+            // 6. Separate Dedicated Admin Button
+            _btnAdmin = new PillButton
+            {
+                Text = "Admin ⚙",
+                Style = PillButtonStyle.WhiteOutlined,
+                Size = new Size(98, 36),
+                Margin = new Padding(8, 0, 8, 0),
+                Font = new Font(Theme.PrimaryFontFamily, 9.5f, FontStyle.Bold)
+            };
+            _btnAdmin.Click += (s, e) => OnNavAdminClick();
+
+            // Add in Right-to-Left order:
             _flowRightActions.Controls.Add(_btnSignOut);
-            _flowRightActions.Controls.Add(_btnAuth);
+            _flowRightActions.Controls.Add(_btnUserProfile);
+            _flowRightActions.Controls.Add(_btnSignUp);
+            _flowRightActions.Controls.Add(_btnSignIn);
             _flowRightActions.Controls.Add(_btnThemeToggle);
+            _flowRightActions.Controls.Add(_btnAdmin);
 
             _pnlTopNav.Controls.Add(_lblLogo);
             _pnlTopNav.Controls.Add(_flowNavTabs);
@@ -211,7 +251,7 @@ namespace RateMe
             {
                 if (_flowRightActions != null)
                 {
-                    _flowRightActions.Location = new Point(ClientSize.Width - 360, 16);
+                    _flowRightActions.Location = new Point(ClientSize.Width - 530, 16);
                 }
                 if (_btnFrap != null)
                 {
@@ -243,7 +283,7 @@ namespace RateMe
             _btnNavWatchlist.Style = viewName == "Watchlist" ? PillButtonStyle.WhiteFilled : PillButtonStyle.WhiteOutlined;
             _btnNavProfile.Style = viewName == "Profile" ? PillButtonStyle.WhiteFilled : PillButtonStyle.WhiteOutlined;
             _btnNavSettings.Style = viewName == "Settings" ? PillButtonStyle.WhiteFilled : PillButtonStyle.WhiteOutlined;
-            _btnNavAdmin.Style = viewName == "Admin" ? PillButtonStyle.WhiteFilled : PillButtonStyle.WhiteOutlined;
+            _btnAdmin.Style = viewName == "Admin" ? PillButtonStyle.WhiteFilled : PillButtonStyle.WhiteOutlined;
 
             _pnlContentHost.Controls.Clear();
 
@@ -268,7 +308,7 @@ namespace RateMe
                     break;
 
                 case "Profile":
-                    _profileView = new ProfileView(_db, _auth, toastAction, OpenMediaDetailDialog, () => OnAuthButtonClick(null, null));
+                    _profileView = new ProfileView(_db, _auth, toastAction, OpenMediaDetailDialog, OpenSignInDialog);
                     viewToHost = _profileView;
                     break;
 
@@ -295,7 +335,7 @@ namespace RateMe
         {
             if (!_auth.IsLoggedIn || !_auth.IsAdmin)
             {
-                using (var dlg = new AuthDialog(_auth))
+                using (var dlg = new AuthDialog(_auth, startInSignUp: false))
                 {
                     if (dlg.ShowDialog(this) == DialogResult.OK)
                     {
@@ -331,21 +371,38 @@ namespace RateMe
             if (_activeViewName == "Admin") _adminView?.RefreshAllData();
         }
 
-        private void OnAuthButtonClick(object sender, EventArgs e)
+        private void OpenSignInDialog()
         {
             if (_auth.IsLoggedIn)
             {
                 SwitchView("Profile");
+                return;
             }
-            else
+
+            using (var dlg = new AuthDialog(_auth, startInSignUp: false))
             {
-                using (var dlg = new AuthDialog(_auth))
+                if (dlg.ShowDialog(this) == DialogResult.OK)
                 {
-                    if (dlg.ShowDialog(this) == DialogResult.OK)
-                    {
-                        ShowToast($"Welcome back, {_auth.CurrentUser.DisplayName}!");
-                        UpdateAuthUI();
-                    }
+                    ShowToast($"Welcome back, {_auth.CurrentUser.DisplayName}!");
+                    UpdateAuthUI();
+                }
+            }
+        }
+
+        private void OpenSignUpDialog()
+        {
+            if (_auth.IsLoggedIn)
+            {
+                SwitchView("Profile");
+                return;
+            }
+
+            using (var dlg = new AuthDialog(_auth, startInSignUp: true))
+            {
+                if (dlg.ShowDialog(this) == DialogResult.OK)
+                {
+                    ShowToast($"Account created! Welcome, {_auth.CurrentUser.DisplayName}!");
+                    UpdateAuthUI();
                 }
             }
         }
@@ -354,20 +411,25 @@ namespace RateMe
         {
             if (_auth.IsLoggedIn)
             {
-                _btnAuth.Text = _auth.CurrentUser.DisplayName ?? _auth.CurrentUser.Username;
-                _btnAuth.Style = PillButtonStyle.WhiteFilled;
+                _btnSignIn.Visible = false;
+                _btnSignUp.Visible = false;
+
+                _btnUserProfile.Text = "👤 " + (_auth.CurrentUser.DisplayName ?? _auth.CurrentUser.Username);
+                _btnUserProfile.Visible = true;
                 _btnSignOut.Visible = true;
 
-                if (_auth.IsAdmin)
-                {
-                    _btnNavAdmin.Text = "Admin ⚙";
-                }
+                _btnAdmin.Visible = true;
+                _btnAdmin.Text = _auth.IsAdmin ? "Admin ★ ⚙" : "Admin ⚙";
             }
             else
             {
-                _btnAuth.Text = "Sign In";
-                _btnAuth.Style = PillButtonStyle.WhiteFilled;
+                _btnSignIn.Visible = true;
+                _btnSignUp.Visible = true;
+                _btnUserProfile.Visible = false;
                 _btnSignOut.Visible = false;
+
+                _btnAdmin.Visible = true;
+                _btnAdmin.Text = "Admin ⚙";
             }
 
             if (_activeViewName == "Profile") _profileView?.LoadUserData();
@@ -380,26 +442,10 @@ namespace RateMe
 
         private void OnFrapButtonClick(object sender, EventArgs e)
         {
-            var curated = _db.GetCuratedMedia();
-            if (curated.Count > 0)
-            {
-                var rand = new Random();
-                var randomPick = curated[rand.Next(curated.Count)];
-                ShowToast($"Random Pick: {randomPick.Title} ★");
-                OpenMediaDetailDialog(randomPick);
-            }
-            else
-            {
-                SwitchView("Search");
-            }
+            SwitchView("Search");
         }
 
-        public void ShowToast(string message)
-        {
-            ShowToast(message, true);
-        }
-
-        public void ShowToast(string message, bool isSuccess)
+        private void ShowToast(string message, bool isSuccess = true)
         {
             _toast.ShowToast(this, message, isSuccess);
         }
