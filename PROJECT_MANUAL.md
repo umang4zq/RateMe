@@ -228,3 +228,4 @@ When testing or verifying the application, run through this feature checklist:
 | **Pill button white rectangle corners** | Placing custom `Control` inside transparent WinForms containers. | Always set `_flowNavTabs.BackColor = Theme.HouseGreen;` and let `PillButton` walk up the control tree to call `g.Clear(parentBg)`. |
 | **Blank input boxes without placeholder text** | WinForms `TextBox` child control drawing on top of parent `OnPaint`. | Use native Windows `EM_SETCUEBANNER` (`SendMessage(handle, 0x1501, 1, placeholder)`) and provide explicit visible `Label` controls above every input. |
 | **SQL Server connection failure** | Local SQL instance not started or LocalDB not created. | The application automatically falls back to local JSON storage (`rateme_data.json`), so no manual intervention is required. |
+
